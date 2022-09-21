@@ -4,7 +4,7 @@ using namespace sofa::component::collision::geometry;
 
 namespace
 {
-    bool testIntersection(Cube& cube1, Cube& cube2, const SReal alarmDist)
+    bool testIntersection(const Cube& cube1, const Cube& cube2, const SReal alarmDist)
     {
         const auto& minVect1 = cube1.minVect();
         const auto& minVect2 = cube2.minVect();
@@ -35,10 +35,10 @@ void THMPGHashTable::init(int hashTableSize,core::CollisionModel *cm,SReal timeS
     resize(0);
     resize(hashTableSize);
 
-    refersh(timeStamp);
+    refresh(timeStamp);
 }
 
-void THMPGHashTable::refersh(SReal timeStamp){
+void THMPGHashTable::refresh(SReal timeStamp){
     if(_timeStamp >= timeStamp)
         return;
 
@@ -105,18 +105,18 @@ void THMPGHashTable::doCollision(THMPGHashTable & me,THMPGHashTable & other,sofa
 
         for(int i = 0 ; i < me._prime_size ; ++i){
             if(me._table[i].updated(timeStamp) && other._table[i].updated(timeStamp)){
-                std::vector<Cube> & vec_elems1 = me._table[i].getCollisionElems();
-                std::vector<Cube> & vec_elems2 = other._table[i].getCollisionElems();
+                const auto& vec_elems1 = me._table[i].getCollisionElems();
+                const auto& vec_elems2 = other._table[i].getCollisionElems();
 
-                size1 = vec_elems1.size();
-                size2 = vec_elems2.size();
+                for (const auto& elem1 : vec_elems1) 
+                {
+                    for (const auto& elem2 : vec_elems2)
+                    {
+                        if (!checkIfCollisionIsDone(elem2.getIndex(), elem1.getIndex(), done_collisions) && testIntersection(elem2, elem1, _alarmDist))
+                        {
+                            ei->intersect(elem2.getExternalChildren().first, elem1.getExternalChildren().first, output);
 
-                for(int j = 0 ; j < size1 ; ++j){
-                    for(int k = 0 ; k < size2 ; ++k){
-                        if(!checkIfCollisionIsDone(vec_elems2[k].getIndex(),vec_elems1[j].getIndex(),done_collisions) && testIntersection(vec_elems2[k],vec_elems1[j],_alarmDist)){
-                            ei->intersect(vec_elems2[k].getExternalChildren().first,vec_elems1[j].getExternalChildren().first,output);
-
-                            done_collisions[vec_elems2[k].getIndex()].push_back(vec_elems1[j].getIndex());
+                            done_collisions[elem2.getIndex()].push_back(elem1.getIndex());
                         }
                     }
                 }
@@ -133,18 +133,18 @@ void THMPGHashTable::doCollision(THMPGHashTable & me,THMPGHashTable & other,sofa
 
         for(int i = 0 ; i < me._prime_size ; ++i){
             if(me._table[i].updated(timeStamp) && other._table[i].updated(timeStamp)){
-                std::vector<Cube> & vec_elems1 = me._table[i].getCollisionElems();
-                std::vector<Cube> & vec_elems2 = other._table[i].getCollisionElems();
+                const auto& vec_elems1 = me._table[i].getCollisionElems();
+                const auto& vec_elems2 = other._table[i].getCollisionElems();
 
-                size1 = vec_elems1.size();
-                size2 = vec_elems2.size();
+                for (const auto& elem1 : vec_elems1)
+                {
+                    for (const auto& elem2 : vec_elems2)
+                    {
+                        if (!checkIfCollisionIsDone(elem1.getIndex(), elem2.getIndex(), done_collisions) && testIntersection(elem1, elem2, _alarmDist))
+                        {
+                            ei->intersect(elem1.getExternalChildren().first, elem2.getExternalChildren().first, output);
 
-                for(int j = 0 ; j < size1 ; ++j){
-                    for(int k = 0 ; k < size2 ; ++k){
-                        if((!checkIfCollisionIsDone(vec_elems1[j].getIndex(),vec_elems2[k].getIndex(),done_collisions)) && testIntersection(vec_elems1[j],vec_elems2[k],_alarmDist)){
-                            ei->intersect(vec_elems1[j].getExternalChildren().first,vec_elems2[k].getExternalChildren().first,output);
-
-                            done_collisions[vec_elems1[j].getIndex()].push_back(vec_elems2[k].getIndex());
+                            done_collisions[elem1.getIndex()].push_back(elem2.getIndex());
                         }
                     }
                 }
@@ -167,27 +167,27 @@ void THMPGHashTable::autoCollide(core::collision::NarrowPhaseDetection * phase,s
     sofa::core::collision::ElementIntersector * ei = interMethod->findIntersector(cm,cm,swap);
     ei->beginIntersect(cm,cm,output);
 
-    for(int i = 0 ; i < _prime_size ; ++i){
-        if(_table[i].needsCollision(timeStamp)){
-            std::vector<Cube> & vec_elems = _table[i].getCollisionElems();
+    //for(int i = 0 ; i < _prime_size ; ++i){
+    //    if(_table[i].needsCollision(timeStamp)){
+    //        const auto& vec_elems = _table[i].getCollisionElems();
+    //        
+    //        size = vec_elems.size();
+    //        sizem1 = size - 1;
 
-            size = vec_elems.size();
-            sizem1 = size - 1;
+    //        for(int j = 0 ; j < sizem1 ; ++j){
+    //            for(int k = j + 1 ; k < size ; ++k){
+    //                if(!checkIfCollisionIsDone(vec_elems[j].getIndex(),vec_elems[k].getIndex(),done_collisions) && testIntersection(vec_elems[j],vec_elems[k],_alarmDist)){
+    //                    ei->intersect(vec_elems[j].getExternalChildren().first,vec_elems[k].getExternalChildren().first,output);
 
-            for(int j = 0 ; j < sizem1 ; ++j){
-                for(int k = j + 1 ; k < size ; ++k){
-                    if(!checkIfCollisionIsDone(vec_elems[j].getIndex(),vec_elems[k].getIndex(),done_collisions) && testIntersection(vec_elems[j],vec_elems[k],_alarmDist)){
-                        ei->intersect(vec_elems[j].getExternalChildren().first,vec_elems[k].getExternalChildren().first,output);
-
-                        done_collisions[vec_elems[j].getIndex()].push_back(vec_elems[k].getIndex());
-                        //WARNING : we don't add the symetric done_collisions[vec_elems[k].getIndex()].push_back(vec_elems[j].getIndex()); because
-                        //elements are added first in all cells they belong to, then next elements are added, so that if two elements share two same
-                        //cells, one element will be first encountered in the both cells.
-                    }
-                }
-            }
-        }
-    }
+    //                    done_collisions[vec_elems[j].getIndex()].push_back(vec_elems[k].getIndex());
+    //                    //WARNING : we don't add the symetric done_collisions[vec_elems[k].getIndex()].push_back(vec_elems[j].getIndex()); because
+    //                    //elements are added first in all cells they belong to, then next elements are added, so that if two elements share two same
+    //                    //cells, one element will be first encountered in the both cells.
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 
     delete[] done_collisions;
 }

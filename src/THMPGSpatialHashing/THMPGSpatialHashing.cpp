@@ -86,7 +86,7 @@ void THMPGSpatialHashing::sumEdgeLength(core::CollisionModel *cm){
         sumEdgeLength_template<LineCollisionModel<sofa::defaulttype::Vec3Types>::DataTypes>(cm);
     else if(cm->getEnumType() == sofa::core::CollisionModel::SPHERE_TYPE){
         const SphereCollisionModel<sofa::defaulttype::Vec3Types> * sphm = static_cast<SphereCollisionModel<sofa::defaulttype::Vec3Types> *>(cm);
-        for(int i = 0 ; i < sphm->getSize() ; ++i){
+        for(sofa::Size i = 0 ; i < sphm->getSize() ; ++i){
             _total_edges_length += (SReal)(2) * sphm->getRadius(i);
         }
         _nb_edges += sphm->getSize();
@@ -229,7 +229,7 @@ void THMPGSpatialHashing::addCollisionPair (const std::pair<core::CollisionModel
     if(!t1.initialized())
         t1.init(_max_cm_size * 3 ,cm1,_timeStamp);
     else
-        t1.refersh(_timeStamp);
+        t1.refresh(_timeStamp);
 
     //t1.showStats(_timeStamp);
     if(cm1 == cm2){
@@ -243,7 +243,7 @@ void THMPGSpatialHashing::addCollisionPair (const std::pair<core::CollisionModel
     if(!t2.initialized())
         t2.init(_max_cm_size * 3,cm2,_timeStamp);
     else
-        t2.refersh(_timeStamp);
+        t2.refresh(_timeStamp);
 
     t1.collide(t2,this,intersectionMethod,_timeStamp);
     //t2.showStats(_timeStamp);

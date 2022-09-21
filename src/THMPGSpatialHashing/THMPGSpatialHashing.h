@@ -73,7 +73,7 @@ protected:
     SReal _nb_edges;
     SReal _nb_elems;
     SReal _total_edges_length;
-    int _max_cm_size;
+    sofa::Size _max_cm_size;
     std::vector<core::CollisionModel*> _collisionModels;
     boost::unordered::unordered_map<sofa::core::CollisionModel*,THMPGHashTable> _hash_tables;
 public:

@@ -14,20 +14,24 @@
 #include <boost/functional/hash.hpp>
 #include <sofa/component/collision/geometry/CubeModel.h>
 
+#include <unordered_set>
+//#include "tsl/hopscotch_set.h"
 
-#define CHECK_IF_ELLEMENT_EXISTS
+//#define CHECK_IF_ELLEMENT_EXISTS
 namespace sofa::component::collision
 {
 
 class SOFA_THMPGSPATIALHASHING_API THMPGCollisionSet
 {
 public:
-    THMPGCollisionSet() : _timeStamp(SReal(-1.0)){}
+    THMPGCollisionSet() = default;
 
-    inline void add(const sofa::component::collision::geometry::Cube& elem,SReal timeStamp){
+    inline void add(const sofa::component::collision::geometry::Cube& elem,SReal timeStamp)
+    {
         //sofa::helper::AdvancedTimer::stepBegin("THMPGCollisionSet : add");
 
-        if(_timeStamp < timeStamp){
+        if(_timeStamp < timeStamp)
+        {
             _timeStamp = timeStamp;
             _coll_elems.clear();
         }
@@ -41,13 +45,14 @@ public:
         }
 
         if(i == _coll_elems.size()){
-            _coll_elems.push_back(elem);
+            _coll_elems.emplace_back(elem);
         }
 #endif
         //sofa::helper::AdvancedTimer::stepEnd("THMPGCollisionSet : add");
     }
 
-    inline void clearAndAdd(sofa::component::collision::geometry::Cube elem,SReal timeStamp){
+    inline void clearAndAdd(sofa::component::collision::geometry::Cube elem,SReal timeStamp)
+    {
         if(_timeStamp != -1)
             _coll_elems.clear();
 
@@ -55,7 +60,8 @@ public:
         _timeStamp = timeStamp;
     }
 
-    inline bool needsCollision(SReal timestamp){
+    inline bool needsCollision(SReal timestamp)
+    {
         if(_timeStamp < timestamp)
             return false;
 
@@ -65,26 +71,42 @@ public:
         return true;
     }
 
-    inline bool updated(SReal timeStamp)const{
+    inline bool updated(SReal timeStamp) const
+    {
         return _timeStamp >= timeStamp;
     }
 
-    inline std::vector<sofa::component::collision::geometry::Cube> & getCollisionElems(){
+    inline auto& getCollisionElems()
+    {
         return _coll_elems;
     }
 
-    inline const std::vector<sofa::component::collision::geometry::Cube> & getCollisionElems()const {
+    inline const auto& getCollisionElems() const 
+    {
         return _coll_elems;
     }
 
-    inline void clear(){
+    inline void clear()
+    {
         _timeStamp = -1.0;
         _coll_elems.clear();
     }
 
 private:
-    SReal _timeStamp;
-    std::vector<sofa::component::collision::geometry::Cube> _coll_elems;
+    SReal _timeStamp{ -1.0 };
+
+    struct CubeHash
+    {
+        std::size_t operator()(const sofa::component::collision::geometry::Cube& c) const
+        {
+            return c.getIndex();
+        }
+    };
+    //using CollisionElementSet = tsl::hopscotch_set<sofa::component::collision::geometry::Cube, CubeHash>;
+    //ing CollisionElementSet = std::unordered_set<sofa::component::collision::geometry::Cube, CubeHash>;
+    using CollisionElementSet = std::vector<sofa::component::collision::geometry::Cube>;
+
+    CollisionElementSet _coll_elems;
 };
 
 #undef CHECK_IF_ELLEMENT_EXISTS
@@ -145,17 +167,11 @@ protected:
 //    };
 
 public:
-    THMPGHashTable() : _cm(nullptr),_timeStamp(-1.0){
-        _p1 = 73856093;
-        _p2 = 19349663;
-        _p3 = 83492791;
+    THMPGHashTable() : _cm(nullptr), _timeStamp(-1.0) {
     }
 
-    THMPGHashTable(int hashTableSize,sofa::core::CollisionModel * cm,SReal timeStamp) : _cm(cm),_timeStamp(-1.0){
-        _p1 = 73856093;
-        _p2 = 19349663;
-        _p3 = 83492791;
-
+    THMPGHashTable(int hashTableSize,sofa::core::CollisionModel * cm,SReal timeStamp) : _cm(cm),_timeStamp(-1.0)
+    {
         init(hashTableSize,cm,timeStamp);
     }
 
@@ -221,7 +237,7 @@ public:
 
     void init(int hashTableSize, core::CollisionModel *cm, SReal timeStamp);
 
-    void refersh(SReal timeStamp);
+    void refresh(SReal timeStamp);
 
     inline bool initialized()const{
         return _cm != nullptr;
@@ -254,9 +270,11 @@ protected:
 
     sofa::core::CollisionModel * _cm;
     boost::hash<std::pair<long int,long int> > _hash_func;
-    long int _p1;
-    long int _p2;
-    long int _p3;
+
+    inline static const long int _p1{ 73856093 };
+    inline static const long int _p2{ 19349663 };
+    inline static const long int _p3{ 83492791 };
+
     long int _size;
     long int _prime_size;
     std::vector<THMPGCollisionSet> _table;
