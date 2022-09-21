@@ -30,7 +30,7 @@ SReal THMPGHashTable::_alarmDist = (SReal)(0);
 SReal THMPGHashTable::_alarmDistd2 = (SReal)(0);
 
 
-void THMPGHashTable::init(int hashTableSize,core::CollisionModel *cm,SReal timeStamp){
+void THMPGHashTable::init(int hashTableSize,core::CollisionModel *cm, int timeStamp){
     _cm = cm->getLast();
     resize(0);
     resize(hashTableSize);
@@ -38,7 +38,7 @@ void THMPGHashTable::init(int hashTableSize,core::CollisionModel *cm,SReal timeS
     refresh(timeStamp);
 }
 
-void THMPGHashTable::refresh(SReal timeStamp){
+void THMPGHashTable::refresh(int timeStamp){
     if(_timeStamp >= timeStamp)
         return;
 
@@ -92,7 +92,7 @@ static bool checkIfCollisionIsDone(const std::vector<int>& tab, int j){
     return false;
 }
 
-void THMPGHashTable::doCollision(THMPGHashTable & me,THMPGHashTable & other,sofa::core::collision::NarrowPhaseDetection * phase,SReal timeStamp,core::collision::ElementIntersector* ei,bool swap){
+void THMPGHashTable::doCollision(THMPGHashTable & me,THMPGHashTable & other,sofa::core::collision::NarrowPhaseDetection * phase, int timeStamp,core::collision::ElementIntersector* ei,bool swap){
     sofa::core::CollisionModel* cm1,*cm2;
     cm1 = me.getCollisionModel();
     cm2 = other.getCollisionModel();
@@ -157,7 +157,7 @@ void THMPGHashTable::doCollision(THMPGHashTable & me,THMPGHashTable & other,sofa
 }
 
 
-void THMPGHashTable::autoCollide(core::collision::NarrowPhaseDetection * phase,sofa::core::collision::Intersection * interMethod,SReal timeStamp){
+void THMPGHashTable::autoCollide(core::collision::NarrowPhaseDetection * phase,sofa::core::collision::Intersection * interMethod, int timeStamp){
     sofa::core::CollisionModel* cm = getCollisionModel();
 
     int size,sizem1;
@@ -194,7 +194,7 @@ void THMPGHashTable::autoCollide(core::collision::NarrowPhaseDetection * phase,s
 }
 
 
-void THMPGHashTable::collide(THMPGHashTable & other,sofa::core::collision::NarrowPhaseDetection * phase,sofa::core::collision::Intersection * interMehtod,SReal timeStamp){
+void THMPGHashTable::collide(THMPGHashTable & other,sofa::core::collision::NarrowPhaseDetection * phase,sofa::core::collision::Intersection * interMehtod, int timeStamp){
     sofa::core::CollisionModel* cm1,*cm2;
     cm1 = getCollisionModel();
     cm2 = other.getCollisionModel();

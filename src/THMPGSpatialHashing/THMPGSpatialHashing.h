@@ -67,7 +67,7 @@ protected:
 
     sofa::type::vector<sofa::component::collision::geometry::CubeCollisionModel*> cubeModels;//AABBs containing the final collision model
     THMPGHashTable _grid;
-    SReal _timeStamp;
+    int _timeStamp;
     SReal _cell_size;
     bool _params_initialized;
     SReal _nb_edges;
@@ -80,7 +80,7 @@ public:
     inline void beginBroadPhase() override
     {
         core::collision::BroadPhaseDetection::beginBroadPhase();
-        _timeStamp += this->getContext()->getDt();
+        _timeStamp++;// += this->getContext()->getDt();
         _collisionModels.clear();
     }
 

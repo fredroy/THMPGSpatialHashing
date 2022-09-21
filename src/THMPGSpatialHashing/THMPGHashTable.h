@@ -26,7 +26,7 @@ class SOFA_THMPGSPATIALHASHING_API THMPGCollisionSet
 public:
     THMPGCollisionSet() = default;
 
-    void add(const sofa::component::collision::geometry::Cube& elem, const SReal timeStamp)
+    void add(const sofa::component::collision::geometry::Cube& elem, const int timeStamp)
     {
         //sofa::helper::AdvancedTimer::stepBegin("THMPGCollisionSet : add");
 
@@ -51,7 +51,7 @@ public:
         //sofa::helper::AdvancedTimer::stepEnd("THMPGCollisionSet : add");
     }
 
-    inline void clearAndAdd(sofa::component::collision::geometry::Cube elem, const SReal timeStamp)
+    inline void clearAndAdd(sofa::component::collision::geometry::Cube elem, const int timeStamp)
     {
         if(_timeStamp != -1)
             _coll_elems.clear();
@@ -60,7 +60,7 @@ public:
         _timeStamp = timeStamp;
     }
 
-    inline bool needsCollision(SReal timestamp)
+    inline bool needsCollision(int timestamp)
     {
         if(_timeStamp < timestamp)
             return false;
@@ -71,7 +71,7 @@ public:
         return true;
     }
 
-    inline bool updated(SReal timeStamp) const
+    inline bool updated(int timeStamp) const
     {
         return _timeStamp >= timeStamp;
     }
@@ -88,12 +88,12 @@ public:
 
     inline void clear()
     {
-        _timeStamp = -1.0;
+        _timeStamp = -1;
         _coll_elems.clear();
     }
 
 private:
-    SReal _timeStamp{ -1.0 };
+    int _timeStamp{ -1 };
 
     struct CubeHash
     {
@@ -167,10 +167,10 @@ protected:
 //    };
 
 public:
-    THMPGHashTable() : _cm(nullptr), _timeStamp(-1.0) {
+    THMPGHashTable() : _cm(nullptr) {
     }
 
-    THMPGHashTable(int hashTableSize,sofa::core::CollisionModel * cm,SReal timeStamp) : _cm(cm),_timeStamp(-1.0)
+    THMPGHashTable(int hashTableSize,sofa::core::CollisionModel * cm, int timeStamp) : _cm(cm)
     {
         init(hashTableSize,cm,timeStamp);
     }
@@ -204,13 +204,13 @@ public:
         return _table[index];
     }
 
-    void autoCollide(core::collision::NarrowPhaseDetection * phase,sofa::core::collision::Intersection * interMethod,SReal timeStamp);
+    void autoCollide(core::collision::NarrowPhaseDetection * phase,sofa::core::collision::Intersection * interMethod, int timeStamp);
 
-    void collide(THMPGHashTable & other,sofa::core::collision::NarrowPhaseDetection * phase,sofa::core::collision::Intersection * interMehtod,SReal timeStamp);
+    void collide(THMPGHashTable & other,sofa::core::collision::NarrowPhaseDetection * phase,sofa::core::collision::Intersection * interMehtod, int timeStamp);
 
     virtual ~THMPGHashTable(){}
 
-    void showStats(SReal timeStamp)const{
+    void showStats(int timeStamp)const{
         int nb_full_cell = 0;
         int nb_elems = 0;
         unsigned int max_elems_in_cell = 0;
@@ -235,9 +235,9 @@ public:
         std::cout<<"===================================================="<<std::endl;
     }
 
-    void init(int hashTableSize, core::CollisionModel *cm, SReal timeStamp);
+    void init(int hashTableSize, core::CollisionModel *cm, int timeStamp);
 
-    void refresh(SReal timeStamp);
+    void refresh(int timeStamp);
 
     inline bool initialized()const{
         return _cm != nullptr;
@@ -265,7 +265,7 @@ public:
 
 protected:
 
-    static void doCollision(THMPGHashTable &me, THMPGHashTable &other, core::collision::NarrowPhaseDetection *phase, SReal timeStamp, core::collision::ElementIntersector *ei, bool swap);
+    static void doCollision(THMPGHashTable &me, THMPGHashTable &other, core::collision::NarrowPhaseDetection *phase, int timeStamp, core::collision::ElementIntersector *ei, bool swap);
 
 
     sofa::core::CollisionModel * _cm;
@@ -280,7 +280,7 @@ protected:
     std::vector<THMPGCollisionSet> _table;
     static SReal _alarmDist;
     static SReal _alarmDistd2;
-    SReal _timeStamp;
+    int _timeStamp{-1};
 };
 
 } // namespace sofa::component::collision
