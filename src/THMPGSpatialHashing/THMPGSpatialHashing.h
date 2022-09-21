@@ -23,21 +23,20 @@
 
 #include <THMPGSpatialHashing/config.h>
 
+#include <sofa/type/Vec.h>
+#include <sofa/core/CollisionModel.h>
+#include <sofa/core/CollisionElement.h>
 #include <sofa/core/collision/BroadPhaseDetection.h>
 #include <sofa/core/collision/NarrowPhaseDetection.h>
-#include <sofa/core/CollisionElement.h>
 #include <sofa/core/collision/NarrowPhaseDetection.h>
-
-#include <sofa/type/Vec.h>
-#include <set>
-#include <boost/unordered_map.hpp>
-#include <sofa/core/CollisionModel.h>
-#include <THMPGSpatialHashing/THMPGHashTable.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
 #include <sofa/core/behavior/MechanicalState.h>
 #include <sofa/simulation/ResetVisitor.h>
+
 #include <boost/unordered_map.hpp>
+
+#include <THMPGSpatialHashing/THMPGHashTable.h>
 
 namespace sofa::component::collision
 {
@@ -63,9 +62,6 @@ protected:
 
     void sumEdgeLength(core::CollisionModel *cm);
 
-    //boost::unordered_map<std::pair<core::CollisionModel*,core::CollisionModel*>,CollidingPair> _qsdf;
-
-    sofa::type::vector<sofa::component::collision::geometry::CubeCollisionModel*> cubeModels;//AABBs containing the final collision model
     THMPGHashTable _grid;
     int _timeStamp;
     SReal _cell_size;

@@ -231,7 +231,7 @@ void THMPGSpatialHashing::addCollisionPair (const std::pair<core::CollisionModel
     else
         t1.refresh(_timeStamp);
 
-    //t1.showStats(_timeStamp);
+    // t1.showStats(_timeStamp);
     if(cm1 == cm2){
         t1.autoCollide(this,intersectionMethod,_timeStamp);
         //sofa::helper::AdvancedTimer::stepEnd("THMPGSpatialHashing::addCollisionPair");

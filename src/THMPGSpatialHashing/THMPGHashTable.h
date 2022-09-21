@@ -1,21 +1,19 @@
 #include <THMPGSpatialHashing/config.h>
 
-#include <vector>
 #include <sofa/core/CollisionElement.h>
+#include <sofa/core/collision/Intersection.h>
+#include <sofa/core/collision/NarrowPhaseDetection.h>
+#include <sofa/helper/AdvancedTimer.h>
+#include <sofa/component/collision/geometry/CubeModel.h>
+
+#include <vector>
+
 #include <boost/version.hpp>
 #if BOOST_VERSION < 106400
 #include <boost/unordered/detail/util.hpp>
 #else
 #include <boost/unordered/detail/implementation.hpp>
 #endif
-#include <sofa/core/collision/Intersection.h>
-#include <sofa/core/collision/NarrowPhaseDetection.h>
-#include <sofa/helper/AdvancedTimer.h>
-#include <boost/functional/hash.hpp>
-#include <sofa/component/collision/geometry/CubeModel.h>
-
-#include <unordered_set>
-//#include "tsl/hopscotch_set.h"
 
 //#define CHECK_IF_ELLEMENT_EXISTS
 namespace sofa::component::collision
@@ -94,18 +92,7 @@ public:
 
 private:
     int _timeStamp{ -1 };
-
-    struct CubeHash
-    {
-        std::size_t operator()(const sofa::component::collision::geometry::Cube& c) const
-        {
-            return c.getIndex();
-        }
-    };
-    //using CollisionElementSet = tsl::hopscotch_set<sofa::component::collision::geometry::Cube, CubeHash>;
-    //ing CollisionElementSet = std::unordered_set<sofa::component::collision::geometry::Cube, CubeHash>;
     using CollisionElementSet = std::vector<sofa::component::collision::geometry::Cube>;
-
     CollisionElementSet _coll_elems;
 };
 
@@ -208,7 +195,7 @@ public:
 
     void collide(THMPGHashTable & other,sofa::core::collision::NarrowPhaseDetection * phase,sofa::core::collision::Intersection * interMehtod, int timeStamp);
 
-    virtual ~THMPGHashTable(){}
+    ~THMPGHashTable() = default;
 
     void showStats(int timeStamp)const{
         int nb_full_cell = 0;
@@ -267,9 +254,7 @@ protected:
 
     static void doCollision(THMPGHashTable &me, THMPGHashTable &other, core::collision::NarrowPhaseDetection *phase, int timeStamp, core::collision::ElementIntersector *ei, bool swap);
 
-
-    sofa::core::CollisionModel * _cm;
-    boost::hash<std::pair<long int,long int> > _hash_func;
+    sofa::core::CollisionModel* _cm;
 
     inline static const long int _p1{ 73856093 };
     inline static const long int _p2{ 19349663 };
