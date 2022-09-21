@@ -26,7 +26,7 @@ class SOFA_THMPGSPATIALHASHING_API THMPGCollisionSet
 public:
     THMPGCollisionSet() = default;
 
-    inline void add(const sofa::component::collision::geometry::Cube& elem,SReal timeStamp)
+    void add(const sofa::component::collision::geometry::Cube& elem, const SReal timeStamp)
     {
         //sofa::helper::AdvancedTimer::stepBegin("THMPGCollisionSet : add");
 
@@ -51,7 +51,7 @@ public:
         //sofa::helper::AdvancedTimer::stepEnd("THMPGCollisionSet : add");
     }
 
-    inline void clearAndAdd(sofa::component::collision::geometry::Cube elem,SReal timeStamp)
+    inline void clearAndAdd(sofa::component::collision::geometry::Cube elem, const SReal timeStamp)
     {
         if(_timeStamp != -1)
             _coll_elems.clear();

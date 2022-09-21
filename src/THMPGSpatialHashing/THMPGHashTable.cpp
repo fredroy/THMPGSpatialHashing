@@ -60,20 +60,22 @@ void THMPGHashTable::refresh(SReal timeStamp){
         ++nb_added_elems;
         const type::Vector3 & minVec = c.minVect();
 
-        mincell[0] = (int)std::floor((minVec[0] - _alarmDistd2)/cell_size);
-        mincell[1] = (int)std::floor((minVec[1] - _alarmDistd2)/cell_size);
-        mincell[2] = (int)std::floor((minVec[2] - _alarmDistd2)/cell_size);
+        mincell[0] = static_cast<int>(std::floor((minVec[0] - _alarmDistd2)/cell_size));
+        mincell[1] = static_cast<int>(std::floor((minVec[1] - _alarmDistd2)/cell_size));
+        mincell[2] = static_cast<int>(std::floor((minVec[2] - _alarmDistd2)/cell_size));
 
         const type::Vector3 & maxVec = c.maxVect();
-        maxcell[0] = (int)std::floor((maxVec[0] + _alarmDistd2)/cell_size);
-        maxcell[1] = (int)std::floor((maxVec[1] + _alarmDistd2)/cell_size);
-        maxcell[2] = (int)std::floor((maxVec[2] + _alarmDistd2)/cell_size);
+        maxcell[0] = static_cast<int>(std::floor((maxVec[0] + _alarmDistd2)/cell_size));
+        maxcell[1] = static_cast<int>(std::floor((maxVec[1] + _alarmDistd2)/cell_size));
+        maxcell[2] = static_cast<int>(std::floor((maxVec[2] + _alarmDistd2)/cell_size));
 
         for(movingcell[0] = mincell[0] ; movingcell[0] <= maxcell[0] ; ++movingcell[0]){
             for(movingcell[1] = mincell[1] ; movingcell[1] <= maxcell[1] ; ++movingcell[1]){
                 for(movingcell[2] = mincell[2] ; movingcell[2] <= maxcell[2] ; ++movingcell[2]){
                     //sofa::helper::AdvancedTimer::stepBegin("THMPGSpatialHashing : addAndCollide");
-                    (*this)(movingcell[0],movingcell[1],movingcell[2]).add(c/*.getExternalChildren().first*/,timeStamp);
+                    auto& current = (*this)(movingcell[0], movingcell[1], movingcell[2]);
+                    current.add(c/*.getExternalChildren().first*/, timeStamp);
+                   //(*this)(movingcell[0],movingcell[1],movingcell[2]).add(c/*.getExternalChildren().first*/,timeStamp);
                     //sofa::helper::AdvancedTimer::stepEnd("THMPGSpatialHashing : addAndCollide");
                 }
             }
@@ -81,9 +83,9 @@ void THMPGHashTable::refresh(SReal timeStamp){
     }
 }
 
-static bool checkIfCollisionIsDone(int i,int j,std::vector<int> * tab){
-    for(unsigned int ii = 0 ; ii < tab[i].size() ; ++ii){
-        if(tab[i][ii] == j)
+static bool checkIfCollisionIsDone(const std::vector<int>& tab, int j){
+    for(unsigned int ii = 0 ; ii < tab.size() ; ++ii){
+        if(tab[ii] == j)
             return true;
     }
 
@@ -97,9 +99,10 @@ void THMPGHashTable::doCollision(THMPGHashTable & me,THMPGHashTable & other,sofa
 
     assert(me._prime_size == other._prime_size);
 
-    int size1,size2;
+    std::vector<std::vector<int>> done_collisions;
+
     if(swap){
-        std::vector<int> * done_collisions = new std::vector<int>[cm2->getSize()];
+        done_collisions.resize(cm2->getSize());
         core::collision::DetectionOutputVector*& output = phase->getDetectionOutputs(cm2,cm1);
         ei->beginIntersect(cm2,cm1,output);
 
@@ -112,21 +115,20 @@ void THMPGHashTable::doCollision(THMPGHashTable & me,THMPGHashTable & other,sofa
                 {
                     for (const auto& elem2 : vec_elems2)
                     {
-                        if (!checkIfCollisionIsDone(elem2.getIndex(), elem1.getIndex(), done_collisions) && testIntersection(elem2, elem1, _alarmDist))
+                        auto& done_collisions_elem = done_collisions[elem2.getIndex()];
+                        if (!checkIfCollisionIsDone(done_collisions_elem, elem1.getIndex()) && testIntersection(elem2, elem1, _alarmDist))
                         {
                             ei->intersect(elem2.getExternalChildren().first, elem1.getExternalChildren().first, output);
 
-                            done_collisions[elem2.getIndex()].push_back(elem1.getIndex());
+                            done_collisions_elem.push_back(elem1.getIndex());
                         }
                     }
                 }
             }
         }
-
-        delete[] done_collisions;
     }
     else{
-        std::vector<int> * done_collisions = new std::vector<int>[cm1->getSize()];
+        done_collisions.resize(cm1->getSize());
 
         core::collision::DetectionOutputVector*& output = phase->getDetectionOutputs(cm1,cm2);
         ei->beginIntersect(cm1,cm2,output);
@@ -140,18 +142,17 @@ void THMPGHashTable::doCollision(THMPGHashTable & me,THMPGHashTable & other,sofa
                 {
                     for (const auto& elem2 : vec_elems2)
                     {
-                        if (!checkIfCollisionIsDone(elem1.getIndex(), elem2.getIndex(), done_collisions) && testIntersection(elem1, elem2, _alarmDist))
+                        auto& done_collisions_elem = done_collisions[elem1.getIndex()];
+                        if (!checkIfCollisionIsDone(done_collisions_elem, elem2.getIndex()) && testIntersection(elem1, elem2, _alarmDist))
                         {
                             ei->intersect(elem1.getExternalChildren().first, elem2.getExternalChildren().first, output);
 
-                            done_collisions[elem1.getIndex()].push_back(elem2.getIndex());
+                            done_collisions_elem.push_back(elem2.getIndex());
                         }
                     }
                 }
             }
         }
-
-        delete[] done_collisions;
     }
 }
 
