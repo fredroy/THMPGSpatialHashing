@@ -8,12 +8,20 @@
 
 #include <vector>
 
-#include <boost/version.hpp>
-#if BOOST_VERSION < 106400
-#include <boost/unordered/detail/util.hpp>
-#else
-#include <boost/unordered/detail/implementation.hpp>
-#endif
+namespace
+{
+    constexpr bool isPrimeLoop(int i, int k) {
+        return (k * k > i) ? true : (i % k == 0) ? false : isPrimeLoop(i, k + 1);
+    }
+
+    constexpr bool isPrime(int i) {
+        return isPrimeLoop(i, 2);
+    }
+
+    constexpr int nextPrime(int k) {
+        return isPrime(k) ? k : nextPrime(k + 1);
+    }
+}
 
 //#define CHECK_IF_ELLEMENT_EXISTS
 namespace sofa::component::collision
@@ -164,7 +172,7 @@ public:
 
     inline void resize(int size){
         _size = size;
-        _prime_size = boost::unordered::detail::next_prime(size);
+        _prime_size = nextPrime(size);
         _table.resize(_prime_size);
     }
 
